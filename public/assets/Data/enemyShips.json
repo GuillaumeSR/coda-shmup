@@ -1,0 +1,20 @@
+{
+  "1": {
+    "movementSpeed": 0.2,
+    "texture": "ufoRed",
+    "body": {
+      "radius": 42,
+      "offsetX": -4,
+      "offsetY": 16
+    }
+  },
+  "2": {
+    "movementSpeed": 0.1,
+    "texture": "ufoBlue",
+    "body": {
+      "radius": 42,
+      "offsetX": -4,
+      "offsetY": 16
+    }
+  }
+}

@@ -3,6 +3,7 @@ import Entity from './Entity.ts';
 import Health from "../components/Health.ts";
 import Movement from "../components/Movement.ts";
 import Weapon from "../components/Weapon.ts";
+import {EnemyShipData, EnemyShipsData} from "../gameData/EnemyShipsData.ts";
 
 export default class Enemy extends Entity {
     private readonly _bulletData: BulletData = {
@@ -14,6 +15,7 @@ export default class Enemy extends Entity {
     };
     private _shootTimerConfig: Phaser.Types.Time.TimerEventConfig;
     private _shootTimer: Phaser.Time.TimerEvent;
+    private _enemyShipData: EnemyShipData
 
     public init(bulletsGroup: Phaser.Physics.Arcade.Group) {
         this.addComponent(new Health(1, this));
@@ -21,6 +23,8 @@ export default class Enemy extends Entity {
         this.addComponent(new Weapon(bulletsGroup, this._bulletData));
 
         this.angle = 90;
+
+        this.selectEnemyShip(Phaser.Math.Between(1, 2));
 
         this._shootTimerConfig = {
             delay: Phaser.Math.Between(2000, 3000),
@@ -35,9 +39,9 @@ export default class Enemy extends Entity {
             this.scene.anims.create({
                 key: 'ufoShoot',
                 frames: [
-                    {key: 'sprites', frame: 'ufoRed.png'},
-                    {key: 'sprites', frame: 'ufoRed-shoot0.png'},
-                    {key: 'sprites', frame: 'ufoRed-shoot1.png'}
+                    {key: 'sprites', frame: 'ufoRed'},
+                    {key: 'sprites', frame: 'ufoRed-shoot0'},
+                    {key: 'sprites', frame: 'ufoRed-shoot1'}
                 ],
                 frameRate: 4,
             });
@@ -81,10 +85,21 @@ export default class Enemy extends Entity {
         this._shootTimer.paused = true;
     }
 
+    public selectEnemyShip(enemyShipDataId: number) {
+        const enemyShipsData = this.scene.cache.json.get('enemyShips') as EnemyShipsData;
+        this._enemyShipData = enemyShipsData[enemyShipDataId];
+
+        this.setTexture('sprites', this._enemyShipData.texture);
+        const bodyData = this._enemyShipData.body;
+        this.arcadeBody.setCircle(bodyData.radius, bodyData.offsetX, bodyData.offsetY);
+
+        this.getComponent(Movement)?.setSpeed(this._enemyShipData.movementSpeed);
+    }
+
     private shoot() {
         this.play('ufoShoot');
         this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-            this.setTexture('sprites', 'ufoRed.png');
+            this.setTexture('sprites', 'ufoRed');
 
             this.getComponent(Weapon)?.shoot(this);
             this.scene.sound.play('sfx_laser2');
