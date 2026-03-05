@@ -24,8 +24,6 @@ export default class Enemy extends Entity {
 
         this.angle = 90;
 
-        this.selectEnemyShip(Phaser.Math.Between(1, 2));
-
         this._shootTimerConfig = {
             delay: Phaser.Math.Between(2000, 3000),
             callback: this.shoot,
@@ -34,25 +32,15 @@ export default class Enemy extends Entity {
         };
         this._shootTimer = this.scene.time.addEvent(this._shootTimerConfig);
 
-        // Create animation when enemy is about to shoot in the global animation manager
-        if (!this.scene.anims.exists('ufoShoot')) {
-            this.scene.anims.create({
-                key: 'ufoShoot',
-                frames: [
-                    {key: 'sprites', frame: 'ufoRed'},
-                    {key: 'sprites', frame: 'ufoRed-shoot0'},
-                    {key: 'sprites', frame: 'ufoRed-shoot1'}
-                ],
-                frameRate: 4,
-            });
-        }
-
         this.arcadeBody.setCircle(this.displayWidth / 2);
     }
 
     public enable(x: number, y: number) {
+        this.selectEnemyShip(Phaser.Math.Between(1, 2));
         this.enableBody(true, x, y - this.displayHeight, true, true);
         this._shootTimer.reset(this._shootTimerConfig);
+        this.anims.stop();
+        this.setTexture('sprites', this._enemyShipData.texture);
 
         const health = this.getComponent(Health);
         health?.on(Health.CHANGE_EVENT, () => {
@@ -95,6 +83,18 @@ export default class Enemy extends Entity {
         const enemyShipsData = this.scene.cache.json.get('enemyShips') as EnemyShipsData;
         this._enemyShipData = enemyShipsData[enemyShipDataId];
 
+        if (!this.scene.anims.exists(this._enemyShipData.texture + '-shoot')) {
+            this.scene.anims.create({
+                key: this._enemyShipData.texture + '-shoot',
+                frames: [
+                    {key: 'sprites', frame: this._enemyShipData.texture},
+                    {key: 'sprites', frame: this._enemyShipData.shootAnimation.sprite0},
+                    {key: 'sprites', frame: this._enemyShipData.shootAnimation.sprite1}
+                ],
+                frameRate: 4,
+            });
+        }
+
         this.setTexture('sprites', this._enemyShipData.texture);
         const bodyData = this._enemyShipData.body;
         this.arcadeBody.setCircle(bodyData.radius, bodyData.offsetX, bodyData.offsetY);
@@ -103,9 +103,9 @@ export default class Enemy extends Entity {
     }
 
     private shoot() {
-        this.play('ufoShoot');
+        this.play(this._enemyShipData.texture + '-shoot');
         this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-            this.setTexture('sprites', 'ufoRed');
+            this.setTexture('sprites', this._enemyShipData.texture);
 
             this.getComponent(Weapon)?.shoot(this);
             this.scene.sound.play('sfx_laser2');
