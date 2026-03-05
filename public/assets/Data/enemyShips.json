@@ -27,7 +27,7 @@
     },
     "amplitude": 200,
     "duration": 1000,
-    "shootingRadius": 180,
+    "spreadAngle": 30,
     "bulletNumber": 3
   }
 }

@@ -13,6 +13,6 @@ export type EnemyShipData = {
   body: ShipBodyData;
   amplitude: number;
   duration: number;
-  shootingRadius: number;
+  spreadAngle: number;
   bulletNumber: number;
 }
