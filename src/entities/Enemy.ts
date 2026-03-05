@@ -15,11 +15,11 @@ export default class Enemy extends Entity {
     };
     private _shootTimerConfig: Phaser.Types.Time.TimerEventConfig;
     private _shootTimer: Phaser.Time.TimerEvent;
-    private _enemyShipData: EnemyShipData
+    private _enemyShipData: EnemyShipData;
 
     public init(bulletsGroup: Phaser.Physics.Arcade.Group) {
         this.addComponent(new Health(1, this));
-        this.addComponent(new Movement(0.2));
+        this.addComponent(new Movement());
         this.addComponent(new Weapon(bulletsGroup, this._bulletData));
 
         this.angle = 90;
