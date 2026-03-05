@@ -16,6 +16,7 @@ export default class Enemy extends Entity {
     private _shootTimerConfig: Phaser.Types.Time.TimerEventConfig;
     private _shootTimer: Phaser.Time.TimerEvent;
     private _enemyShipData: EnemyShipData;
+    private _movementTween?: Phaser.Tweens.Tween;
 
     public init(bulletsGroup: Phaser.Physics.Arcade.Group) {
         this.addComponent(new Health(1, this));
@@ -54,6 +55,19 @@ export default class Enemy extends Entity {
         this.enableBody(true, x, y - this.displayHeight, true, true);
         this._shootTimer.reset(this._shootTimerConfig);
 
+        if (this._movementTween) {
+            this._movementTween.remove();
+        }
+
+        this._movementTween = this.scene!.tweens.add({
+            targets: this,
+            x: x + 100,
+            duration: 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'sine.inout'
+        });
+
         const health = this.getComponent(Health);
         health?.on(Health.CHANGE_EVENT, () => {
             this.setTintFill(0xffffff);
@@ -79,6 +93,9 @@ export default class Enemy extends Entity {
 
     public disable() {
         this.stop();
+        if (this._movementTween) {
+            this._movementTween.remove();
+        }
         this.removeAllListeners(Phaser.Animations.Events.ANIMATION_COMPLETE);
 
         this.disableBody(true, true);

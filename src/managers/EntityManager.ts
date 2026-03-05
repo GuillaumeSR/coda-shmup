@@ -120,15 +120,6 @@ export default class EntityManager extends Plugins.ScenePlugin {
             return;
         }
 
-        this.scene!.tweens.add({
-            targets: enemy,
-            x: '+=200',
-            duration: 1000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'sine.inout'
-        });
-
         enemy.enable(Phaser.Math.Between(64, this.scene!.cameras.main.width - 64), 0);
 
         this.game!.events.emit(GameConstants.Events.ENEMY_SPAWNED_EVENT, enemy);
