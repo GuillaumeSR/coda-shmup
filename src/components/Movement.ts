@@ -33,4 +33,22 @@ export default class Movement implements IComponent {
 
         entity.y += this._speed * deltaTime;
     }
+
+    public moveSinusoidal(entity: Entity, amplitude: number, duration: number) {
+        if (!this.enabled)
+            return;
+
+        entity.x -= amplitude / 2;
+
+        entity.scene.tweens.killTweensOf(entity)
+
+        entity.scene!.tweens.add({
+            targets: entity,
+            x: entity.x + amplitude,
+            duration: duration,
+            yoyo: true,
+            repeat: -1,
+            ease: 'sine.inout'
+        })
+    }
 }

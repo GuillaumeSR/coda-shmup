@@ -6,8 +6,11 @@ export type EnemyShipsData = {
 
 export type EnemyShipData = {
   movementSpeed: number;
+  specialMovement: string;
   texture: string;
   body: ShipBodyData;
+  amplitude: number;
+  duration: number;
   shootingRadius: number;
   bulletNumber: number;
 }

@@ -10,11 +10,16 @@
   },
   "2": {
     "movementSpeed": 0.1,
+    "specialMovement": "sinus",
     "texture": "ufoBlue",
     "body": {
       "radius": 42,
       "offsetX": -4,
       "offsetY": 16
-    }
+    },
+    "amplitude": 200,
+    "duration": 1000,
+    "shootingRadius": 180,
+    "bulletNumber": 3
   }
 }
