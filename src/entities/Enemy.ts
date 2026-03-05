@@ -85,6 +85,8 @@ export default class Enemy extends Entity {
         this.stop();
         this.removeAllListeners(Phaser.Animations.Events.ANIMATION_COMPLETE);
 
+        this.scene!.tweens.killTweensOf(this)
+
         this.disableBody(true, true);
         this._shootTimer.paused = true;
     }
