@@ -1,0 +1,33 @@
+{
+  "1": {
+    "movementSpeed": 0.2,
+    "texture": "ufoRed",
+    "shootAnimation": {
+      "sprite0": "ufoRed-shoot0",
+      "sprite1": "ufoRed-shoot1"
+    },
+    "body": {
+      "radius": 42,
+      "offsetX": -4,
+      "offsetY": 16
+    }
+  },
+  "2": {
+    "movementSpeed": 0.1,
+    "specialMovement": "sinus",
+    "texture": "ufoBlue",
+    "shootAnimation": {
+      "sprite0": "ufoBlue-shoot0",
+      "sprite1": "ufoBlue-shoot1"
+    },
+    "body": {
+      "radius": 42,
+      "offsetX": -4,
+      "offsetY": 16
+    },
+    "amplitude": 200,
+    "duration": 1000,
+    "spreadAngle": 30,
+    "bulletNumber": 3
+  }
+}

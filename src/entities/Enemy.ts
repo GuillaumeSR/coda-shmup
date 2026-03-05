@@ -3,6 +3,7 @@ import Entity from './Entity.ts';
 import Health from "../components/Health.ts";
 import Movement from "../components/Movement.ts";
 import Weapon from "../components/Weapon.ts";
+import {EnemyShipData, EnemyShipsData} from "../gameData/EnemyShipsData.ts";
 
 export default class Enemy extends Entity {
     private readonly _bulletData: BulletData = {
@@ -14,10 +15,11 @@ export default class Enemy extends Entity {
     };
     private _shootTimerConfig: Phaser.Types.Time.TimerEventConfig;
     private _shootTimer: Phaser.Time.TimerEvent;
+    private _enemyShipData: EnemyShipData;
 
     public init(bulletsGroup: Phaser.Physics.Arcade.Group) {
         this.addComponent(new Health(1, this));
-        this.addComponent(new Movement(0.2));
+        this.addComponent(new Movement());
         this.addComponent(new Weapon(bulletsGroup, this._bulletData));
 
         this.angle = 90;
@@ -30,25 +32,15 @@ export default class Enemy extends Entity {
         };
         this._shootTimer = this.scene.time.addEvent(this._shootTimerConfig);
 
-        // Create animation when enemy is about to shoot in the global animation manager
-        if (!this.scene.anims.exists('ufoShoot')) {
-            this.scene.anims.create({
-                key: 'ufoShoot',
-                frames: [
-                    {key: 'sprites', frame: 'ufoRed.png'},
-                    {key: 'sprites', frame: 'ufoRed-shoot0.png'},
-                    {key: 'sprites', frame: 'ufoRed-shoot1.png'}
-                ],
-                frameRate: 4,
-            });
-        }
-
         this.arcadeBody.setCircle(this.displayWidth / 2);
     }
 
     public enable(x: number, y: number) {
+        this.selectEnemyShip(Phaser.Math.Between(1, 2));
         this.enableBody(true, x, y - this.displayHeight, true, true);
         this._shootTimer.reset(this._shootTimerConfig);
+        this.anims.stop();
+        this.setTexture('sprites', this._enemyShipData.texture);
 
         const health = this.getComponent(Health);
         health?.on(Health.CHANGE_EVENT, () => {
@@ -69,6 +61,10 @@ export default class Enemy extends Entity {
             });
         });
 
+        if (this._enemyShipData.specialMovement == "sinus") {
+            this.getComponent(Movement)?.moveSinusoidal(this, this._enemyShipData.amplitude, this._enemyShipData.duration)
+        }
+
         // Restore health, in case the enemy is reused from the pool, without emitting events
         health?.heal(health!.max, false);
     }
@@ -77,16 +73,41 @@ export default class Enemy extends Entity {
         this.stop();
         this.removeAllListeners(Phaser.Animations.Events.ANIMATION_COMPLETE);
 
+        this.scene!.tweens.killTweensOf(this)
+
         this.disableBody(true, true);
         this._shootTimer.paused = true;
     }
 
-    private shoot() {
-        this.play('ufoShoot');
-        this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-            this.setTexture('sprites', 'ufoRed.png');
+    public selectEnemyShip(enemyShipDataId: number) {
+        const enemyShipsData = this.scene.cache.json.get('enemyShips') as EnemyShipsData;
+        this._enemyShipData = enemyShipsData[enemyShipDataId];
 
-            this.getComponent(Weapon)?.shoot(this);
+        if (!this.scene.anims.exists(this._enemyShipData.texture + '-shoot')) {
+            this.scene.anims.create({
+                key: this._enemyShipData.texture + '-shoot',
+                frames: [
+                    {key: 'sprites', frame: this._enemyShipData.texture},
+                    {key: 'sprites', frame: this._enemyShipData.shootAnimation.sprite0},
+                    {key: 'sprites', frame: this._enemyShipData.shootAnimation.sprite1}
+                ],
+                frameRate: 4,
+            });
+        }
+
+        this.setTexture('sprites', this._enemyShipData.texture);
+        const bodyData = this._enemyShipData.body;
+        this.arcadeBody.setCircle(bodyData.radius, bodyData.offsetX, bodyData.offsetY);
+
+        this.getComponent(Movement)?.setSpeed(this._enemyShipData.movementSpeed);
+    }
+
+    private shoot() {
+        this.play(this._enemyShipData.texture + '-shoot');
+        this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+            this.setTexture('sprites', this._enemyShipData.texture);
+
+            this.getComponent(Weapon)?.shoot(this, this._enemyShipData.bulletNumber, this._enemyShipData.spreadAngle);
             this.scene.sound.play('sfx_laser2');
         });
     }

@@ -19,28 +19,30 @@ export default class Weapon implements IComponent {
         this._bulletData = bulletData;
     }
 
-    public shoot(source: Entity) {
+    public shoot(source: Entity, count: number = 1, spread: number = 0) {
         if (!this.enabled)
             return;
 
         if (!this._bullets)
             return;
 
-        const bullet: Bullet = this._bullets.get() as Bullet;
-        if (bullet) {
-            // Get forward vector of the source entity
-            const sourceForward: Phaser.Math.Vector2 = new Phaser.Math.Vector2(1, 0).rotate(source.rotation);
-            const bulletVelocity: Phaser.Math.Vector2 = sourceForward.clone().scale(this._bulletData.speed);
-            bullet.enable(source.x + sourceForward.x * source.arcadeBody.radius, source.y + sourceForward.y * source.arcadeBody.radius,
-                bulletVelocity.x, bulletVelocity.y, this._bulletData);
+        const spreadInRad = Phaser.Math.DegToRad(spread);
 
-            // Maths way
-            // const forwardVectorX: number = Math.cos(source.rotation);
-            // const forwardVectorY: number = Math.sin(source.rotation);
-            // const bulletVelocityX: number = forwardVectorX * this._bulletData.speed;
-            // const bulletVelocityY: number = forwardVectorY * this._bulletData.speed;
-            // bullet.enable(source.x + forwardVectorX * source.arcadeBody.radius, source.y + forwardVectorY * source.arcadeBody.radius,
-            //     bulletVelocityX, bulletVelocityY, this._bulletData);
+        const startAngle = source.rotation - spreadInRad / 2;
+
+        const step = count > 1 ? spreadInRad / (count - 1) : 0;
+
+        for (let i = 0; i < count; i++) {
+            const bullet: Bullet = this._bullets.get() as Bullet;
+            if (bullet) {
+                const bulletAngle = startAngle + i * step;
+                const sourceForward: Phaser.Math.Vector2 = new Phaser.Math.Vector2(1, 0).rotate(bulletAngle);
+                const bulletVelocity: Phaser.Math.Vector2 = sourceForward.clone().scale(this._bulletData.speed);
+                bullet.enable(source.x + sourceForward.x * source.arcadeBody.radius, source.y + sourceForward.y * source.arcadeBody.radius,
+                  bulletVelocity.x, bulletVelocity.y, this._bulletData);
+
+
+            }
         }
     }
 }
